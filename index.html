@@ -52,32 +52,56 @@
       #messages > li:nth-child(odd) {
         background: #efefef;
       }
+
+      #typing {
+          bottom: 1;
+      }
     </style>
   </head>
   <body>
     <ul id="messages"></ul>
-    <form id="form" action=""><input id="input" autocomplete="off" /><button>Send</button></form>
+    <div id="typing"></div>
+    <form id="form" action="">
+      <input id="nicknameInput" autocomplete="off" placeholder="anonymous" />
+      <input id="messageInput" autocomplete="off" />
+      <button>Send</button>
+    </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
 
       var messages = document.getElementById("messages");
       var form = document.getElementById("form");
-      var input = document.getElementById("input");
+      var nicknameInput = document.getElementById("nicknameInput");
+      var messageInput = document.getElementById("messageInput");
+      var typing = document.getElementById("typing");
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-        if (input.value) {
-          socket.emit("chat message", input.value);
-          input.value = "";
+        if (nicknameInput.value && messageInput.value) {
+          socket.emit("chat message", nicknameInput.value || "anonymous", messageInput.value);
+          messageInput.value = "";
         }
       });
 
-      socket.on("chat message", function (msg) {
+      socket.on("chat message", function (nickname, msg) {
         var item = document.createElement("li");
-        item.textContent = msg;
+        item.innerHTML = "<p><strong>" + nickname + " : </strong>" + msg + "</p>";
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+
+        // clear the typing indicator when we receive a message
+        typing.innerHTML = "";
+      });
+
+      // emit a “typing” event when we start typing
+      messageInput.addEventListener("keypress", function () {
+        socket.emit("typing", nicknameInput.value);
+      });
+
+      // when we receive a typing event, show that a user is typing
+      socket.on("typing", function (data) {
+        typing.innerHTML = "<p><em>" + data + " is typing</em></p>";
       });
     </script>
   </body>

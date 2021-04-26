@@ -10,17 +10,22 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", function (socket) {
-  console.log("Yay, connection was recorded");
-  socket.broadcast.emit("chat message", "some user connected");
+  console.log("Yay, connection with " + socket.id + " was recorded");
+  socket.broadcast.emit("chat message", "server", "some user connected");
 
-  socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
-    console.log("message: " + msg);
+  socket.on("chat message", (nickname, msg) => {
+    io.emit("chat message", nickname, msg);
+    console.log("message: " + nickname, msg);
   });
 
   socket.on("disconnect", function () {
-    socket.broadcast.emit("chat message", "some user disconnected");
+    socket.broadcast.emit("chat message", "server", "some user disconnected");
     console.log("Oh No, someone disconnected");
+  });
+
+  socket.on("typing", function (data) {
+    // send an event to everyone but the person who emitted the typing event to the server
+    socket.broadcast.emit("typing", data);
   });
 });
 
