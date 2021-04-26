@@ -5,6 +5,8 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+var count = 0;
+
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
@@ -12,6 +14,8 @@ app.get("/", (req, res) => {
 io.on("connection", function (socket) {
   console.log("Yay, connection with " + socket.id + " was recorded");
   socket.broadcast.emit("chat message", "server", "some user connected");
+  count += 1;
+  io.sockets.emit("broadcast", count + " people online!");
 
   socket.on("chat message", (nickname, msg) => {
     io.emit("chat message", nickname, msg);
@@ -21,6 +25,8 @@ io.on("connection", function (socket) {
   socket.on("disconnect", function () {
     socket.broadcast.emit("chat message", "server", "some user disconnected");
     console.log("Oh No, someone disconnected");
+    count -= 1;
+    io.sockets.emit("broadcast", count + " people online!");
   });
 
   socket.on("typing", function (data) {
