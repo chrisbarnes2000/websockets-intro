@@ -9,16 +9,18 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-io.on("connection", (socket) => {
-  console.log("a user connected");
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
+io.on("connection", function (socket) {
+  console.log("Yay, connection was recorded");
+  socket.broadcast.emit("chat message", "some user connected");
 
   socket.on("chat message", (msg) => {
-    console.log("message: " + msg);
     io.emit("chat message", msg);
+    console.log("message: " + msg);
+  });
+
+  socket.on("disconnect", function () {
+    socket.broadcast.emit("chat message", "some user disconnected");
+    console.log("Oh No, someone disconnected");
   });
 });
 
