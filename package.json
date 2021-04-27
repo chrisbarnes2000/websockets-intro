@@ -1,7 +1,14 @@
 {
-    "name": "socket-chat-example",
-    "version": "0.0.1",
+    "name": "ms-clubs-socket-chat",
+    "version": "0.0.2",
     "description": "my first socket.io app",
+    "main": "./server/server.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node server.js"
+    },
+    "author": "Chris Barnes",
+    "license": "MIT",
     "dependencies": {
         "express": "^4.17.1",
         "lodash": "^4.17.21",
